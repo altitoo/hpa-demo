@@ -1,3 +1,23 @@
+apiVersion: k6.io/v1alpha1
+kind: K6
+metadata:
+  name: webapp-load-test
+spec:
+  parallelism: 2
+  script:
+    configMap:
+      name: k6-test-script
+      file: test.js
+  arguments:
+    - "--out"
+    - "experimental-prometheus-rw"
+  runner:
+    env:
+      - name: K6_PROMETHEUS_RW_SERVER_URL
+        value: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+      - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+        value: "true"
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,19 +29,31 @@ data:
 
     export let options = {
       stages: [
-        { duration: '30s', target: 50 },
-        { duration: '1m', target: 100 },
-        { duration: '30s', target: 200 },
         { duration: '1m', target: 300 },
-        { duration: '30s', target: 0 },
+        { duration: '2m', target: 800 },
+        { duration: '1m', target: 1500 },
+        { duration: '2m', target: 3000 },
+        { duration: '1m', target: 0 },
       ],
     };
 
     export default function () {
-      let response = http.get('http://webapp.default.svc.cluster.local/');
+      let response = http.get('http://webapp.default.svc.cluster.local:9898/');
+      
       check(response, {
         'status is 200': (r) => r.status === 200,
+        'response time < 500ms': (r) => r.timings.duration < 500,
+        'page contains podinfo': (r) => r.body.includes('podinfo'),
       });
       
-      sleep(Math.random() * 2);
+      // Occasionally hit other endpoints for variety
+      if (Math.random() < 0.2) {
+        http.get('http://webapp.default.svc.cluster.local:9898/version');
+      }
+      
+      if (Math.random() < 0.1) {
+        http.get('http://webapp.default.svc.cluster.local:9898/healthz');
+      }
+      
+      sleep(1);
     }
