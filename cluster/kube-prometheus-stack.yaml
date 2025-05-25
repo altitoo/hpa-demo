@@ -15,6 +15,19 @@ spec:
           adminPassword: admin123
         prometheus:
           enabled: true
+          prometheusSpec:
+            enableRemoteWriteReceiver: true
+            remoteWriteReceiver:
+              enabled: true
+            retention: 10d
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: standard
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
   
   destination:
     server: https://kubernetes.default.svc
