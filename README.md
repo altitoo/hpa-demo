@@ -60,7 +60,7 @@ echo "127.0.0.1 webapp.local" | sudo tee -a /etc/hosts
 ```
 
 ## Access podinfo UI
-Open your browser and go to `http://podinfo.local:8000/` to access the podinfo application.
+Open your browser and go to `http://webapp.local:8000/` to access the podinfo application.
 
 
 ## Apply the load test
