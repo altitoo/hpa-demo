@@ -1,7 +1,7 @@
 apiVersion: k6.io/v1alpha1
 kind: K6
 metadata:
-  name: podinfo-load-test
+  name: webapp-load-test
 spec:
   parallelism: 2
   script:
@@ -30,15 +30,17 @@ data:
 
     export default function () {
       // Test the main endpoint
-      let response = http.get('http://podinfo.default.svc.cluster.local:9898/');
+      let response = http.get('http://webapp.default.svc.cluster.local/');
       check(response, {
         'status is 200': (r) => r.status === 200,
         'response time < 500ms': (r) => r.timings.duration < 500,
       });
       
-      // Test different endpoints
-      http.get('http://podinfo.default.svc.cluster.local:9898/version');
-      http.get('http://podinfo.default.svc.cluster.local:9898/healthz');
+      // Test health endpoint
+      http.get('http://webapp.default.svc.cluster.local/health');
+      
+      // Add some CPU-intensive requests
+      http.get('http://webapp.default.svc.cluster.local/?load=true');
       
       sleep(Math.random() * 2);
     }

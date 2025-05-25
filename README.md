@@ -46,7 +46,7 @@ kubectl get secret kube-prometheus-stack-grafana -n monitoring -o jsonpath="{.da
 ## Deploy the demo application
 
 ```bash
-kubectl apply -f apps/podinfo.yaml
+kubectl apply -f apps/webapp/application.yaml
 ```
 
 ## Forward podinfo UI
