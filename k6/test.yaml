@@ -1,0 +1,44 @@
+apiVersion: k6.io/v1alpha1
+kind: K6
+metadata:
+  name: podinfo-load-test
+spec:
+  parallelism: 2
+  script:
+    configMap:
+      name: k6-test-script
+      file: test.js
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-test-script
+data:
+  test.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+
+    export let options = {
+      stages: [
+        { duration: '1m', target: 300 },
+        { duration: '2m', target: 800 },
+        { duration: '1m', target: 1500 },
+        { duration: '2m', target: 3000 },
+        { duration: '1m', target: 0 },
+      ],
+    };
+
+    export default function () {
+      // Test the main endpoint
+      let response = http.get('http://podinfo.default.svc.cluster.local:9898/');
+      check(response, {
+        'status is 200': (r) => r.status === 200,
+        'response time < 500ms': (r) => r.timings.duration < 500,
+      });
+      
+      // Test different endpoints
+      http.get('http://podinfo.default.svc.cluster.local:9898/version');
+      http.get('http://podinfo.default.svc.cluster.local:9898/healthz');
+      
+      sleep(Math.random() * 2);
+    }
