@@ -16,17 +16,17 @@ spec:
     spec:
       containers:
       - name: webapp
-        image: mendhak/http-https-echo:31  # Shows all request details
+        image: stefanprodan/podinfo:6.9.0
         ports:
-        - containerPort: 8080
+        - containerPort: 9898
           name: http
+        - containerPort: 9999
+          name: grpc
         env:
-        - name: HTTP_PORT
-          value: "8080"
-        - name: LOG_WITHOUT_NEWLINE
-          value: "true"
-        - name: LOG_IGNORE_PATH
-          value: "/health"
+        - name: PODINFO_UI_COLOR
+          value: "#34577c"
+        - name: PODINFO_UI_MESSAGE
+          value: "HPA Demo - Request Counter"
         resources:
           requests:
             cpu: 100m
@@ -36,13 +36,13 @@ spec:
             memory: 128Mi
         livenessProbe:
           httpGet:
-            path: /health
-            port: 8080
+            path: /healthz
+            port: 9898
           initialDelaySeconds: 10
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /health
-            port: 8080
+            path: /readyz
+            port: 9898
           initialDelaySeconds: 5
           periodSeconds: 5

@@ -56,7 +56,7 @@ kubectl port-forward -n ingress-nginx svc/nginx-ingress-ingress-nginx-controller
 
 ## Add podinfo host to /etc/hosts
 ```bash
-echo "127.0.0.1 podinfo.local" | sudo tee -a /etc/hosts
+echo "127.0.0.1 webapp.local" | sudo tee -a /etc/hosts
 ```
 
 ## Access podinfo UI
